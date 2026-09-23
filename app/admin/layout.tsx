@@ -12,7 +12,7 @@ import { useRouter } from 'next/navigation'
 const navItems = [
   { name: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
   { name: 'Jobs', href: '/admin/jobs', icon: Briefcase },
-  // { name: 'Applications', href: '/admin/applications', icon: FileText },
+  { name: 'Applications', href: '/admin/applications', icon: FileText },
   { name: 'Categories', href: '/admin/categories', icon: Tags },
   // { name: 'Users', href: '/admin/users', icon: Users },
   // { name: 'Settings', href: '/admin/settings', icon: Settings },
