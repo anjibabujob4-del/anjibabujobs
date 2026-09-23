@@ -13,14 +13,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+import { JobActions } from './job-actions'
 
 export default async function AdminJobsPage({
   searchParams,
@@ -119,31 +112,7 @@ export default async function AdminJobsPage({
                         {new Date(job.created_at).toLocaleDateString()}
                       </TableCell>
                       <TableCell className="text-right">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger className="inline-flex h-8 w-8 p-0 items-center justify-center rounded-md hover:bg-slate-100 text-slate-500">
-                            <span className="sr-only">Open menu</span>
-                            <MoreHorizontal className="h-4 w-4" />
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                            <Link href={`/jobs/${job.id}`} target="_blank" className="cursor-pointer">
-                              <DropdownMenuItem>
-                                View Public Page
-                              </DropdownMenuItem>
-                            </Link>
-                            <DropdownMenuSeparator />
-                            <Link href={`/admin/jobs/${job.id}/edit`} className="cursor-pointer">
-                              <DropdownMenuItem>
-                                <Edit className="w-4 h-4 mr-2 text-slate-500" />
-                                Edit Job
-                              </DropdownMenuItem>
-                            </Link>
-                            <DropdownMenuItem className="text-red-600 focus:text-red-600 cursor-pointer">
-                              <Trash2 className="w-4 h-4 mr-2" />
-                              Delete
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                        <JobActions job={job} />
                       </TableCell>
                     </TableRow>
                   ))
