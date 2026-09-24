@@ -12,7 +12,7 @@ function getAnswerValue(answers: any[], possibleNames: string[]) {
   return null
 }
 
-export async function GET(request: Request, { params }: { params: { id: string } }) {
+export async function GET(request: Request, context: { params: Promise<{ id: string }> }) {
   const supabase = await createClient()
 
   // Verify admin access
@@ -26,7 +26,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
-  const { id } = params
+  const { id } = await context.params
 
   const { data: appData, error: appError } = await supabase
     .from('applications')

@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 
-export async function GET(request: Request, { params }: { params: { id: string, documentId: string } }) {
+export async function GET(request: Request, context: { params: Promise<{ id: string, documentId: string }> }) {
   const supabase = await createClient()
 
   // 1. Verify access (Auth)
@@ -11,7 +11,7 @@ export async function GET(request: Request, { params }: { params: { id: string, 
   }
 
   // RLS policies on the 'documents' table will enforce admin-only access automatically
-  const { id, documentId } = params
+  const { id, documentId } = await context.params
 
   // 2. Find the document record
   const { data: doc, error: docError } = await supabase
