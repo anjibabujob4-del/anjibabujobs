@@ -47,28 +47,53 @@ export default function CategoryManager({
   // Form states
   const [name, setName] = useState('')
   const [icon, setIcon] = useState('')
+  const [imageFile, setImageFile] = useState<File | null>(null)
+  const [imagePreview, setImagePreview] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   // Handlers
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        setError('Image must be smaller than 5 MB.')
+        return
+      }
+      setImageFile(file)
+      setImagePreview(URL.createObjectURL(file))
+      setError(null)
+    }
+  }
+
   const handleAddSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!imageFile) {
+      setError('Category Image is required for new categories.')
+      return
+    }
+    
     setIsLoading(true)
     setError(null)
     
     try {
-      const { data, error: insertError } = await supabase
-        .from('job_categories')
-        .insert({ name, icon: icon || null })
-        .select()
-        .single()
-        
-      if (insertError) throw insertError
+      const formData = new FormData()
+      formData.append('name', name)
+      formData.append('image', imageFile)
       
-      setCategories([...categories, data].sort((a, b) => a.name.localeCompare(b.name)))
+      const res = await fetch('/api/admin/categories', {
+        method: 'POST',
+        body: formData,
+      })
+      
+      const result = await res.json()
+      if (!res.ok) throw new Error(result.error || 'Failed to add category')
+      
+      setCategories([...categories, result.category].sort((a, b) => a.name.localeCompare(b.name)))
       setIsAddOpen(false)
       setName('')
-      setIcon('')
+      setImageFile(null)
+      setImagePreview(null)
       router.refresh()
     } catch (err: any) {
       setError(err.message || 'Failed to add category')
@@ -83,16 +108,24 @@ export default function CategoryManager({
     setError(null)
     
     try {
-      const { data, error: updateError } = await supabase
-        .from('job_categories')
-        .update({ name, icon: icon || null })
-        .eq('id', selectedCategory.id)
-        .select()
-        .single()
-        
-      if (updateError) throw updateError
+      const formData = new FormData()
+      formData.append('name', name)
+      if (imageFile) {
+        formData.append('image', imageFile)
+      } else {
+        // Keep existing icon if no new image uploaded
+        formData.append('icon', icon || '')
+      }
       
-      setCategories(categories.map(c => c.id === selectedCategory.id ? data : c))
+      const res = await fetch(`/api/admin/categories/${selectedCategory.id}`, {
+        method: 'PUT',
+        body: formData,
+      })
+      
+      const result = await res.json()
+      if (!res.ok) throw new Error(result.error || 'Failed to update category')
+      
+      setCategories(categories.map(c => c.id === selectedCategory.id ? result.category : c))
       setIsEditOpen(false)
       router.refresh()
     } catch (err: any) {
@@ -107,12 +140,12 @@ export default function CategoryManager({
     setError(null)
     
     try {
-      const { error: deleteError } = await supabase
-        .from('job_categories')
-        .delete()
-        .eq('id', selectedCategory.id)
-        
-      if (deleteError) throw deleteError
+      const res = await fetch(`/api/admin/categories/${selectedCategory.id}`, {
+        method: 'DELETE'
+      })
+      
+      const result = await res.json()
+      if (!res.ok) throw new Error(result.error || 'Failed to delete category')
       
       setCategories(categories.filter(c => c.id !== selectedCategory.id))
       setIsDeleteOpen(false)
@@ -128,6 +161,8 @@ export default function CategoryManager({
     setSelectedCategory(cat)
     setName(cat.name)
     setIcon(cat.icon || '')
+    setImageFile(null)
+    setImagePreview(cat.icon?.startsWith('http') ? cat.icon : null)
     setIsEditOpen(true)
   }
 
@@ -147,6 +182,8 @@ export default function CategoryManager({
           onClick={() => {
             setName('')
             setIcon('')
+            setImageFile(null)
+            setImagePreview(null)
             setError(null)
             setIsAddOpen(true)
           }}
@@ -177,8 +214,8 @@ export default function CategoryManager({
             <Table>
               <TableHeader className="bg-slate-50">
                 <TableRow>
-                  <TableHead className="w-[300px] font-semibold text-slate-700">Category Name</TableHead>
-                  <TableHead className="font-semibold text-slate-700 hidden sm:table-cell">Icon ID</TableHead>
+                  <TableHead className="w-[300px] font-semibold text-slate-700">Category</TableHead>
+                  <TableHead className="font-semibold text-slate-700 hidden sm:table-cell">Image</TableHead>
                   <TableHead className="font-semibold text-slate-700 hidden md:table-cell">Date Created</TableHead>
                   <TableHead className="text-right font-semibold text-slate-700">Actions</TableHead>
                 </TableRow>
@@ -195,10 +232,20 @@ export default function CategoryManager({
                     <TableRow key={cat.id} className="hover:bg-slate-50/50">
                       <TableCell className="font-medium text-slate-900">
                         {cat.name}
-                        <div className="text-xs text-slate-500 sm:hidden mt-1">Icon: {cat.icon || 'Default'}</div>
+                        <div className="text-xs text-slate-500 sm:hidden mt-2">
+                          {cat.icon?.startsWith('http') ? (
+                            <img src={cat.icon} alt={cat.name} className="w-8 h-8 object-contain rounded" />
+                          ) : (
+                            <span className="bg-slate-100 px-2 py-1 rounded">No Image</span>
+                          )}
+                        </div>
                       </TableCell>
                       <TableCell className="text-slate-500 hidden sm:table-cell">
-                        {cat.icon || 'None'}
+                        {cat.icon?.startsWith('http') ? (
+                          <img src={cat.icon} alt={cat.name} className="w-12 h-12 object-contain rounded-lg border border-slate-200 bg-white p-1" />
+                        ) : (
+                          <span className="bg-slate-100 text-xs px-2 py-1 rounded text-slate-500">{cat.icon || 'None'}</span>
+                        )}
                       </TableCell>
                       <TableCell className="text-slate-500 hidden md:table-cell">
                         {new Date(cat.created_at).toLocaleDateString()}
@@ -237,10 +284,14 @@ export default function CategoryManager({
                 <div key={cat.id} className="p-4 flex items-center justify-between hover:bg-slate-50/50">
                   <div className="space-y-1">
                     <div className="font-semibold text-slate-900 text-base">{cat.name}</div>
-                    <div className="text-xs text-slate-500 flex items-center gap-2">
-                      <span className="bg-slate-100 px-2 py-0.5 rounded text-slate-600">
-                        {cat.icon || 'No Icon'}
-                      </span>
+                    <div className="text-xs text-slate-500 flex items-center gap-2 mt-2">
+                      {cat.icon?.startsWith('http') ? (
+                        <img src={cat.icon} alt={cat.name} className="w-10 h-10 object-contain rounded border border-slate-200 bg-white p-1" />
+                      ) : (
+                        <span className="bg-slate-100 px-2 py-1 rounded text-slate-600">
+                          {cat.icon || 'No Icon'}
+                        </span>
+                      )}
                       <span>{new Date(cat.created_at).toLocaleDateString()}</span>
                     </div>
                   </div>
@@ -282,10 +333,15 @@ export default function CategoryManager({
               <Input id="name" required value={name} onChange={e => setName(e.target.value)} placeholder="e.g. Graphic Designers" />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="icon">Icon Name (optional)</Label>
-              <Input id="icon" value={icon} onChange={e => setIcon(e.target.value)} placeholder="e.g. Briefcase" />
-              <p className="text-xs text-slate-500">Lucide icon name to display.</p>
+              <Label htmlFor="image">Category Image <span className="text-red-500">*</span></Label>
+              <Input id="image" type="file" accept="image/png, image/jpeg, image/webp, image/svg+xml" required onChange={handleImageChange} />
+              <p className="text-xs text-slate-500">Supported: PNG, JPG, WEBP, SVG (Max 5MB)</p>
             </div>
+            {imagePreview && (
+              <div className="mt-4 p-4 border border-slate-200 rounded-lg bg-slate-50 flex justify-center">
+                <img src={imagePreview} alt="Preview" className="h-24 w-24 object-contain" />
+              </div>
+            )}
             <DialogFooter className="pt-4">
               <Button type="button" variant="outline" onClick={() => setIsAddOpen(false)}>Cancel</Button>
               <Button type="submit" className="bg-blue-600" disabled={isLoading}>
@@ -310,9 +366,16 @@ export default function CategoryManager({
               <Input id="edit-name" required value={name} onChange={e => setName(e.target.value)} />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="edit-icon">Icon Name (optional)</Label>
-              <Input id="edit-icon" value={icon} onChange={e => setIcon(e.target.value)} />
+              <Label htmlFor="edit-image">Category Image</Label>
+              <Input id="edit-image" type="file" accept="image/png, image/jpeg, image/webp, image/svg+xml" onChange={handleImageChange} />
+              <p className="text-xs text-slate-500">Select a new image to replace the current one.</p>
             </div>
+            {imagePreview && (
+              <div className="mt-4 p-4 border border-slate-200 rounded-lg bg-slate-50 flex flex-col items-center gap-2">
+                <span className="text-xs text-slate-500 uppercase font-semibold">Image Preview</span>
+                <img src={imagePreview} alt="Preview" className="h-24 w-24 object-contain" />
+              </div>
+            )}
             <DialogFooter className="pt-4">
               <Button type="button" variant="outline" onClick={() => setIsEditOpen(false)}>Cancel</Button>
               <Button type="submit" className="bg-blue-600" disabled={isLoading}>

@@ -30,7 +30,7 @@ type Job = {
   vacancies: number
   created_at: string
   status: string
-  job_categories?: { name: string }
+  job_categories?: { name: string; icon?: string }
   company_name?: string
 }
 
@@ -58,7 +58,7 @@ export function LatestJobsSection() {
           vacancies,
           created_at,
           status,
-          job_categories!inner(name)
+          job_categories!inner(name, icon)
         `)
         .eq('status', 'PUBLISHED')
         .order('created_at', { ascending: false })
@@ -193,7 +193,11 @@ export function LatestJobsSection() {
                       ₹{job.salary_min} – ₹{job.salary_max} / month
                     </div>
                     <div className="inline-flex items-center gap-1.5 text-xs font-medium text-blue-700 bg-blue-50 px-2 py-1 rounded-md">
-                      <Briefcase className="w-3.5 h-3.5 text-blue-500" />
+                      {job.job_categories?.icon?.startsWith('http') ? (
+                        <img src={job.job_categories.icon} alt="icon" className="w-3.5 h-3.5 object-contain" />
+                      ) : (
+                        <Briefcase className="w-3.5 h-3.5 text-blue-500" />
+                      )}
                       {job.employment_type || 'Full Time'} • {job.job_categories?.name || 'General'}
                     </div>
                     <div className="inline-flex items-center gap-1.5 text-xs font-medium text-green-700 bg-green-50 px-2 py-1 rounded-md">

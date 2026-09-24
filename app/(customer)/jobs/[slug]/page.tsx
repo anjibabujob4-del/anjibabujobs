@@ -84,7 +84,7 @@ export default async function DynamicJobOrCategoryPage({
     // Fetch only PUBLISHED jobs for this category
     const { data: categoryJobs } = await supabase
       .from('jobs')
-      .select('*, job_categories(name, slug)')
+      .select('*, job_categories(name, slug, icon)')
       .eq('category_id', category.id)
       .eq('status', 'PUBLISHED')
       .order('created_at', { ascending: false })
@@ -166,7 +166,10 @@ export default async function DynamicJobOrCategoryPage({
                   <CardContent className="p-6 space-y-4">
                     <div className="flex items-start justify-between gap-2">
                       <div className="space-y-1">
-                        <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-200 border-0 font-medium text-xs">
+                        <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-200 border-0 font-medium text-xs flex items-center gap-1.5 w-fit">
+                          {job.job_categories?.icon?.startsWith('http') && (
+                            <img src={job.job_categories.icon} alt="icon" className="w-3 h-3 object-contain" />
+                          )}
                           {job.job_categories?.name || category.name}
                         </Badge>
                         <h3 className="text-xl font-bold text-slate-900 group-hover:text-blue-600 transition-colors line-clamp-1">
@@ -232,7 +235,7 @@ export default async function DynamicJobOrCategoryPage({
   const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(slug)
   const { data: job, error: jobError } = await supabase
     .from('jobs')
-    .select('*, job_categories(id, name, slug)')
+    .select('*, job_categories(id, name, slug, icon)')
     .or(`slug.eq.${slug}${isUuid ? `,id.eq.${slug}` : ''}`)
     .maybeSingle()
 
@@ -261,7 +264,10 @@ export default async function DynamicJobOrCategoryPage({
               <CardContent className="p-6 md:p-8 space-y-6">
                 <div className="border-b pb-6">
                   <div className="flex flex-wrap items-center gap-2 mb-3">
-                    <Badge className="bg-blue-100 text-blue-800 border-0 font-medium">
+                    <Badge className="bg-blue-100 text-blue-800 border-0 font-medium flex items-center gap-1.5 px-3 py-1">
+                      {job.job_categories?.icon?.startsWith('http') && (
+                        <img src={job.job_categories.icon} alt="icon" className="w-4 h-4 object-contain" />
+                      )}
                       {job.job_categories?.name || 'General'}
                     </Badge>
                     <Badge variant="outline" className="text-slate-600">

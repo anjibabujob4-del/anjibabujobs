@@ -21,7 +21,7 @@ export default async function JobsPage({
   // Build Query
   let query = supabase
     .from('jobs')
-    .select(`*, job_categories(name)`)
+    .select(`*, job_categories(name, icon)`)
     .eq('status', 'PUBLISHED')
     .order('created_at', { ascending: false })
 
@@ -30,7 +30,7 @@ export default async function JobsPage({
     // Supabase allows filtering on nested tables like: job_categories!inner(name)
     query = supabase
       .from('jobs')
-      .select(`*, job_categories!inner(name)`)
+      .select(`*, job_categories!inner(name, icon)`)
       .eq('status', 'PUBLISHED')
       .eq('job_categories.name', categoryParam)
       .order('created_at', { ascending: false })
@@ -120,7 +120,11 @@ export default async function JobsPage({
                         
                         <div className="flex flex-wrap gap-2 sm:gap-3 text-xs sm:text-sm text-slate-600">
                           <span className="flex items-center gap-1.5 bg-blue-50 text-blue-700 px-2.5 py-1 rounded-md font-medium">
-                            <Briefcase className="w-4 h-4" />
+                            {job.job_categories?.icon?.startsWith('http') ? (
+                              <img src={job.job_categories.icon} alt="icon" className="w-4 h-4 object-contain" />
+                            ) : (
+                              <Briefcase className="w-4 h-4" />
+                            )}
                             {job.job_categories?.name || 'General'}
                           </span>
                           <span className="flex items-center gap-1.5 bg-slate-100 text-slate-700 px-2.5 py-1 rounded-md">

@@ -59,7 +59,7 @@ const defaultCategories = [
   { name: 'Security Guards', slug: 'security-guards' },
   { name: 'Maintenance Staff', slug: 'maintenance-staff' },
   { name: 'Office Staff', slug: 'office-staff' },
-]
+] as { name: string; slug: string; icon?: string }[]
 
 export default async function HomePage() {
   const supabase = await createClient()
@@ -67,7 +67,7 @@ export default async function HomePage() {
   // Fetch categories from DB
   const { data: dbCategories } = await supabase
     .from('job_categories')
-    .select('id, name, slug')
+    .select('id, name, slug, icon')
     .order('name', { ascending: true })
 
   // Merge DB categories with default slugs
@@ -76,6 +76,7 @@ export default async function HomePage() {
       ? dbCategories.map((c) => ({
           name: c.name,
           slug: c.slug || c.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
+          icon: c.icon,
         }))
       : defaultCategories
 
@@ -190,7 +191,11 @@ export default async function HomePage() {
                     <div
                       className={`p-3 sm:p-4 rounded-xl sm:rounded-2xl transition-colors duration-300 shadow-sm ${colorClass}`}
                     >
-                      <IconComp className="w-6 h-6 sm:w-8 sm:h-8" />
+                      {cat.icon?.startsWith('http') ? (
+                        <img src={cat.icon} alt={cat.name} className="w-8 h-8 sm:w-10 sm:h-10 object-contain mx-auto" />
+                      ) : (
+                        <IconComp className="w-6 h-6 sm:w-8 sm:h-8 mx-auto" />
+                      )}
                     </div>
                     <h3 className="font-bold text-slate-800 text-xs sm:text-base group-hover:text-blue-700 transition-colors line-clamp-2 sm:line-clamp-1 leading-tight">
                       {cat.name}
