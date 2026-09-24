@@ -234,15 +234,19 @@ export default function CategoryManager({
                         {cat.name}
                         <div className="text-xs text-slate-500 sm:hidden mt-2">
                           {cat.icon?.startsWith('http') ? (
-                            <img src={cat.icon} alt={cat.name} className="w-8 h-8 object-contain rounded" />
+                            <div className="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center shadow-sm border border-slate-200 bg-white">
+                              <img src={cat.icon} alt={cat.name} className="w-full h-full object-contain p-0.5" />
+                            </div>
                           ) : (
-                            <span className="bg-slate-100 px-2 py-1 rounded">No Image</span>
+                            <span className="bg-slate-100 px-2 py-1 rounded text-slate-600">No Image</span>
                           )}
                         </div>
                       </TableCell>
                       <TableCell className="text-slate-500 hidden sm:table-cell">
                         {cat.icon?.startsWith('http') ? (
-                          <img src={cat.icon} alt={cat.name} className="w-12 h-12 object-contain rounded-lg border border-slate-200 bg-white p-1" />
+                          <div className="w-12 h-12 rounded-xl overflow-hidden flex items-center justify-center shadow-sm border border-slate-200 bg-white">
+                            <img src={cat.icon} alt={cat.name} className="w-full h-full object-contain p-0.5" />
+                          </div>
                         ) : (
                           <span className="bg-slate-100 text-xs px-2 py-1 rounded text-slate-500">{cat.icon || 'None'}</span>
                         )}
@@ -286,7 +290,9 @@ export default function CategoryManager({
                     <div className="font-semibold text-slate-900 text-base">{cat.name}</div>
                     <div className="text-xs text-slate-500 flex items-center gap-2 mt-2">
                       {cat.icon?.startsWith('http') ? (
-                        <img src={cat.icon} alt={cat.name} className="w-10 h-10 object-contain rounded border border-slate-200 bg-white p-1" />
+                        <div className="w-10 h-10 rounded-lg overflow-hidden flex items-center justify-center shadow-sm border border-slate-200 bg-white">
+                          <img src={cat.icon} alt={cat.name} className="w-full h-full object-contain p-0.5" />
+                        </div>
                       ) : (
                         <span className="bg-slate-100 px-2 py-1 rounded text-slate-600">
                           {cat.icon || 'No Icon'}
@@ -338,8 +344,11 @@ export default function CategoryManager({
               <p className="text-xs text-slate-500">Supported: PNG, JPG, WEBP, SVG (Max 5MB)</p>
             </div>
             {imagePreview && (
-              <div className="mt-4 p-4 border border-slate-200 rounded-lg bg-slate-50 flex justify-center">
-                <img src={imagePreview} alt="Preview" className="h-24 w-24 object-contain" />
+              <div className="mt-4 p-6 border border-slate-200 rounded-xl bg-slate-50 flex flex-col items-center justify-center gap-4">
+                <span className="text-xs text-slate-500 uppercase font-semibold">Image Preview</span>
+                <div className="w-[64px] h-[64px] rounded-xl overflow-hidden flex items-center justify-center shadow-sm border border-slate-200 bg-white">
+                  <img src={imagePreview} alt="Preview" className="w-full h-full object-contain p-1" />
+                </div>
               </div>
             )}
             <DialogFooter className="pt-4">
@@ -371,9 +380,11 @@ export default function CategoryManager({
               <p className="text-xs text-slate-500">Select a new image to replace the current one.</p>
             </div>
             {imagePreview && (
-              <div className="mt-4 p-4 border border-slate-200 rounded-lg bg-slate-50 flex flex-col items-center gap-2">
+              <div className="mt-4 p-6 border border-slate-200 rounded-xl bg-slate-50 flex flex-col items-center justify-center gap-4">
                 <span className="text-xs text-slate-500 uppercase font-semibold">Image Preview</span>
-                <img src={imagePreview} alt="Preview" className="h-24 w-24 object-contain" />
+                <div className="w-[64px] h-[64px] rounded-xl overflow-hidden flex items-center justify-center shadow-sm border border-slate-200 bg-white">
+                  <img src={imagePreview} alt="Preview" className="w-full h-full object-contain p-1" />
+                </div>
               </div>
             )}
             <DialogFooter className="pt-4">

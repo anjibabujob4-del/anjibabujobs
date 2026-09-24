@@ -188,15 +188,17 @@ export default async function HomePage() {
                   className="group block focus:outline-none"
                 >
                   <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-200/50 transition-all duration-300 group-hover:shadow-xl group-hover:-translate-y-1.5 group-hover:border-blue-400 group-hover:bg-white text-center h-full flex flex-col items-center justify-center gap-2 sm:gap-3">
-                    <div
-                      className={`p-3 sm:p-4 rounded-xl sm:rounded-2xl transition-colors duration-300 shadow-sm ${colorClass}`}
-                    >
-                      {cat.icon?.startsWith('http') ? (
-                        <img src={cat.icon} alt={cat.name} className="w-8 h-8 sm:w-10 sm:h-10 object-contain mx-auto" />
-                      ) : (
+                    {cat.icon?.startsWith('http') ? (
+                      <div className="w-[52px] h-[52px] sm:w-[56px] sm:h-[56px] md:w-[64px] md:h-[64px] rounded-xl overflow-hidden flex items-center justify-center shadow-sm border border-slate-100 bg-white group-hover:border-blue-400 transition-colors">
+                        <img src={cat.icon} alt={cat.name} className="w-full h-full object-contain p-1" />
+                      </div>
+                    ) : (
+                      <div
+                        className={`p-3 sm:p-4 rounded-xl sm:rounded-2xl transition-colors duration-300 shadow-sm ${colorClass}`}
+                      >
                         <IconComp className="w-6 h-6 sm:w-8 sm:h-8 mx-auto" />
-                      )}
-                    </div>
+                      </div>
+                    )}
                     <h3 className="font-bold text-slate-800 text-xs sm:text-base group-hover:text-blue-700 transition-colors line-clamp-2 sm:line-clamp-1 leading-tight">
                       {cat.name}
                     </h3>
