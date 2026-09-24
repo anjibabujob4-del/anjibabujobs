@@ -52,7 +52,7 @@ export async function PUT(request: NextRequest, context: { params: Promise<{ id:
         })
 
       if (uploadError) {
-        return NextResponse.json({ error: 'Unable to upload image. Please try again.' }, { status: 500 })
+        return NextResponse.json({ error: `Upload error: ${uploadError.message}` }, { status: 500 })
       }
 
       const { data: publicUrlData } = supabase.storage
