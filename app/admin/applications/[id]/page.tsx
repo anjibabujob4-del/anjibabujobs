@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
-import { ArrowLeft, FileText, Download, Loader2, User, Briefcase, Calendar, Phone } from 'lucide-react'
+import { ArrowLeft, FileText, Download, Loader2, User, Briefcase, Calendar, Phone, Mail, MapPin, Eye } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
@@ -22,8 +22,6 @@ export default function ApplicationDetailsPage() {
   const supabase = createClient()
 
   const [application, setApplication] = useState<any>(null)
-  const [answers, setAnswers] = useState<any[]>([])
-  const [documents, setDocuments] = useState<any[]>([])
   
   const [isLoading, setIsLoading] = useState(true)
   const [isUpdating, setIsUpdating] = useState(false)
@@ -34,48 +32,21 @@ export default function ApplicationDetailsPage() {
       if (!id) return;
       
       try {
-        // 1. Fetch Application + Job + Profile
-        const { data: appData, error: appError } = await supabase
-          .from('applications')
-          .select(`
-            *,
-            jobs (title, location, employment_type),
-            profiles (full_name, mobile)
-          `)
-          .eq('id', id)
-          .single()
-
-        if (appError) throw appError;
-        setApplication(appData)
-
-        // 2. Fetch Application Answers
-        const { data: ansData } = await supabase
-          .from('application_answers')
-          .select(`
-            *,
-            application_fields (label, type)
-          `)
-          .eq('application_id', id)
-        
-        if (ansData) setAnswers(ansData)
-
-        // 3. Fetch Documents
-        const { data: docData } = await supabase
-          .from('documents')
-          .select('*')
-          .eq('application_id', id)
-
-        if (docData) setDocuments(docData)
-
+        const res = await fetch(`/api/admin/applications/${id}`)
+        if (!res.ok) {
+          throw new Error('Failed to load application details.')
+        }
+        const data = await res.json()
+        setApplication(data)
       } catch (err: any) {
-        setError('Failed to load application details.')
+        setError(err.message)
       } finally {
         setIsLoading(false)
       }
     }
     
     fetchDetails()
-  }, [id, supabase])
+  }, [id])
 
   const handleStatusChange = async (newStatus: string) => {
     setIsUpdating(true)
@@ -130,11 +101,11 @@ export default function ApplicationDetailsPage() {
           <div>
             <div className="flex items-center gap-2">
               <h1 className="text-2xl font-black text-slate-900 tracking-tight">
-                App #{application.application_number}
+                App #{application.applicationNumber}
               </h1>
             </div>
             <p className="text-slate-500 mt-0.5 text-sm">
-              Submitted on {new Date(application.created_at).toLocaleString()}
+              Submitted on {new Date(application.applicationDate).toLocaleString()}
             </p>
           </div>
         </div>
@@ -153,6 +124,7 @@ export default function ApplicationDetailsPage() {
               <SelectItem value="INTERVIEW">Interview Scheduled</SelectItem>
               <SelectItem value="SELECTED">Selected / Hired</SelectItem>
               <SelectItem value="REJECTED">Rejected</SelectItem>
+              <SelectItem value="WITHDRAWN">Withdrawn</SelectItem>
               <SelectItem value="CLOSED">Closed</SelectItem>
             </SelectContent>
           </Select>
@@ -173,13 +145,27 @@ export default function ApplicationDetailsPage() {
             <CardContent className="p-5 space-y-4">
               <div>
                 <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Full Name</p>
-                <p className="font-medium text-slate-900">{application.profiles?.full_name || 'Unknown'}</p>
+                <p className="font-medium text-slate-900">{application.candidateName}</p>
               </div>
               <div>
                 <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Contact</p>
                 <div className="flex items-center gap-2">
                   <Phone className="w-3.5 h-3.5 text-slate-400" />
-                  <p className="font-medium text-slate-900">{application.profiles?.mobile || 'Not Provided'}</p>
+                  <p className="font-medium text-slate-900">{application.candidateMobile || 'Not Provided'}</p>
+                </div>
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Email</p>
+                <div className="flex items-center gap-2">
+                  <Mail className="w-3.5 h-3.5 text-slate-400" />
+                  <p className="font-medium text-slate-900">{application.candidateEmail || 'Not Provided'}</p>
+                </div>
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Address</p>
+                <div className="flex items-start gap-2 mt-1">
+                  <MapPin className="w-3.5 h-3.5 text-slate-400 mt-0.5" />
+                  <p className="font-medium text-slate-900 text-sm">{application.candidateAddress || 'Not Provided'}</p>
                 </div>
               </div>
             </CardContent>
@@ -195,18 +181,18 @@ export default function ApplicationDetailsPage() {
             <CardContent className="p-5 space-y-4">
               <div>
                 <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Role</p>
-                <Link href={`/jobs/${application.job_id}`} target="_blank" className="font-medium text-blue-600 hover:underline">
-                  {application.jobs?.title || 'Unknown Job'}
-                </Link>
+                <span className="font-medium text-blue-600">
+                  {application.jobTitle || 'Unknown Job'}
+                </span>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Location</p>
-                  <p className="font-medium text-slate-900 text-sm">{application.jobs?.location}</p>
+                  <p className="font-medium text-slate-900 text-sm">{application.jobLocation || 'Not specified'}</p>
                 </div>
                 <div>
                   <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Type</p>
-                  <p className="font-medium text-slate-900 text-sm">{application.jobs?.employment_type}</p>
+                  <p className="font-medium text-slate-900 text-sm">{application.jobType || 'Not specified'}</p>
                 </div>
               </div>
             </CardContent>
@@ -223,19 +209,19 @@ export default function ApplicationDetailsPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="p-0">
-              {answers.length === 0 ? (
+              {(!application.answers || application.answers.length === 0) ? (
                 <div className="p-8 text-center text-slate-500">
                   No custom questions were answered for this application.
                 </div>
               ) : (
                 <div className="divide-y divide-slate-100">
-                  {answers.map((ans) => (
-                    <div key={ans.id} className="p-5 hover:bg-slate-50/30 transition-colors">
+                  {application.answers.map((ans: any, idx: number) => (
+                    <div key={idx} className="p-5 hover:bg-slate-50/30 transition-colors">
                       <p className="text-sm font-semibold text-slate-700 mb-2">
-                        {ans.application_fields?.label || 'Unknown Question'}
+                        {ans.label}
                       </p>
                       <div className="text-slate-900 bg-slate-50 border border-slate-100 p-3 rounded-md whitespace-pre-wrap">
-                        {ans.value || <span className="text-slate-400 italic">No answer provided</span>}
+                        {ans.value}
                       </div>
                     </div>
                   ))}
@@ -252,37 +238,46 @@ export default function ApplicationDetailsPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="p-5">
-              {documents.length === 0 ? (
+              {(!application.documents || application.documents.length === 0) ? (
                 <div className="text-center text-slate-500 py-4">
                   No documents were uploaded by the candidate.
                 </div>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {documents.map((doc) => {
-                    // Create a public URL for downloading
-                    const { data: publicUrlData } = supabase.storage
-                      .from('resumes')
-                      .getPublicUrl(doc.file_path)
-
+                <div className="flex flex-col gap-3">
+                  {application.documents.map((doc: any) => {
+                    const downloadUrl = `/api/admin/applications/${id}/documents/${doc.id}/download`
+                    
                     return (
-                      <a 
-                        key={doc.id}
-                        href={publicUrlData.publicUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="flex items-center justify-between p-4 border border-slate-200 rounded-lg hover:border-blue-300 hover:shadow-md transition-all group"
-                      >
+                      <div key={doc.id} className="flex items-center justify-between p-4 border border-slate-200 rounded-lg hover:border-blue-300 transition-all bg-white group">
                         <div className="flex items-center gap-3 overflow-hidden">
                           <div className="bg-blue-50 p-2 rounded-md group-hover:bg-blue-100 transition-colors shrink-0">
                             <FileText className="w-5 h-5 text-blue-600" />
                           </div>
                           <div className="overflow-hidden">
-                            <p className="font-medium text-slate-900 text-sm truncate">{doc.file_name}</p>
-                            <p className="text-xs text-slate-500">Click to view/download</p>
+                            <p className="font-medium text-slate-900 text-sm truncate">{doc.fileName}</p>
+                            <p className="text-xs text-slate-500">{(doc.size / 1024).toFixed(1)} KB • {doc.fileType}</p>
                           </div>
                         </div>
-                        <Download className="w-4 h-4 text-slate-300 group-hover:text-blue-600 shrink-0" />
-                      </a>
+                        <div className="flex gap-2">
+                          <a 
+                            href={`${downloadUrl}?action=view`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium bg-slate-100 hover:bg-slate-200 text-slate-700 rounded transition-colors"
+                          >
+                            <Eye className="w-3.5 h-3.5" />
+                            View
+                          </a>
+                          <a 
+                            href={`${downloadUrl}?action=download`}
+                            download={doc.fileName}
+                            className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium bg-blue-50 hover:bg-blue-100 text-blue-700 rounded transition-colors"
+                          >
+                            <Download className="w-3.5 h-3.5" />
+                            Download
+                          </a>
+                        </div>
+                      </div>
                     )
                   })}
                 </div>

@@ -34,6 +34,17 @@ const getStatusBadge = (status: string) => {
   }
 }
 
+function getAnswerValue(answers: any[], possibleNames: string[]) {
+  for (const ans of answers) {
+    const fieldName = ans.application_fields?.field_name?.toLowerCase()
+    const label = ans.application_fields?.label?.toLowerCase()
+    if (possibleNames.includes(fieldName) || possibleNames.includes(label)) {
+      return ans.value
+    }
+  }
+  return null
+}
+
 export default async function AdminApplicationsPage() {
   const supabase = await createClient()
 
@@ -43,7 +54,14 @@ export default async function AdminApplicationsPage() {
     .select(`
       *,
       jobs (title),
-      profiles (full_name, mobile)
+      profiles (full_name, mobile),
+      application_answers (
+        value,
+        application_fields (
+          field_name,
+          label
+        )
+      )
     `)
     .order('created_at', { ascending: false })
 
@@ -87,17 +105,29 @@ export default async function AdminApplicationsPage() {
                     </TableCell>
                   </TableRow>
                 ) : (
-                  applications.map((app: any) => (
+                  applications.map((app: any) => {
+                    const answers = app.application_answers || []
+                    const candidateName = 
+                      app.profiles?.full_name || 
+                      getAnswerValue(answers, ['full_name', 'fullname', 'full name', 'name']) || 
+                      'Unknown Candidate'
+                    
+                    const candidateMobile = 
+                      app.profiles?.mobile || 
+                      getAnswerValue(answers, ['mobile', 'mobile_number', 'phone', 'contact', 'mobile number']) || 
+                      null
+                      
+                    return (
                     <TableRow key={app.id} className="hover:bg-slate-50/50 transition-colors">
                       <TableCell className="font-mono text-xs font-medium text-slate-600">
                         {app.application_number}
                       </TableCell>
                       <TableCell>
                         <div className="font-semibold text-slate-900">
-                          {app.profiles?.full_name || 'Unknown Candidate'}
+                          {candidateName}
                         </div>
-                        {app.profiles?.mobile && (
-                          <div className="text-xs text-slate-500">{app.profiles.mobile}</div>
+                        {candidateMobile && (
+                          <div className="text-xs text-slate-500">{candidateMobile}</div>
                         )}
                       </TableCell>
                       <TableCell className="font-medium text-slate-700">
@@ -118,7 +148,7 @@ export default async function AdminApplicationsPage() {
                         </Link>
                       </TableCell>
                     </TableRow>
-                  ))
+                  )})
                 )}
               </TableBody>
             </Table>
