@@ -1,41 +1,25 @@
 'use client'
 
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import { Edit, MoreHorizontal, Trash2 } from 'lucide-react'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+import { Edit, Trash2, ExternalLink } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 
 export function JobActions({ job }: { job: any }) {
-  const router = useRouter()
-
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger className="inline-flex h-8 w-8 p-0 items-center justify-center rounded-md hover:bg-slate-100 text-slate-500">
-        <span className="sr-only">Open menu</span>
-        <MoreHorizontal className="h-4 w-4" />
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-        <DropdownMenuItem onClick={() => window.open(`/jobs/${job.id}`, '_blank')} className="cursor-pointer">
-          View Public Page
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => router.push(`/admin/jobs/${job.id}/edit`)} className="cursor-pointer">
-          <Edit className="w-4 h-4 mr-2 text-slate-500" />
-          Edit Job
-        </DropdownMenuItem>
-        <DropdownMenuItem className="text-red-600 focus:text-red-600 cursor-pointer">
-          <Trash2 className="w-4 h-4 mr-2" />
-          Delete
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <div className="flex items-center justify-end gap-2">
+      <Link href={`/jobs/${job.id}`} target="_blank">
+        <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:text-blue-600" title="View Public Page">
+          <ExternalLink className="h-4 w-4" />
+        </Button>
+      </Link>
+      <Link href={`/admin/jobs/${job.id}/edit`}>
+        <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:text-amber-600" title="Edit Job">
+          <Edit className="h-4 w-4" />
+        </Button>
+      </Link>
+      <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-500 hover:text-red-600 hover:bg-red-50" title="Delete Job">
+        <Trash2 className="h-4 w-4" />
+      </Button>
+    </div>
   )
 }
