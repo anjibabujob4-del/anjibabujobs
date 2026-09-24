@@ -56,7 +56,6 @@ export function LatestJobsSection() {
           experience,
           created_at,
           status,
-          company_name,
           job_categories!inner(name)
         `)
         .eq('status', 'PUBLISHED')
