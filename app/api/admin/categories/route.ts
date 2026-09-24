@@ -1,13 +1,13 @@
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
 import { revalidatePath, revalidateTag } from 'next/cache'
 
 
 export async function POST(request: Request) {
   try {
+    // 1. Verify auth with the anon/session client
     const supabase = await createClient()
-
-    // Verify admin access
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -18,6 +18,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
+    // 2. Use admin client (service role) for DB mutations — bypasses RLS
+    const adminSupabase = createAdminClient()
+
     const formData = await request.formData()
     const name = formData.get('name') as string
     const image = formData.get('image') as File | null
@@ -27,18 +30,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Category name is required' }, { status: 400 })
     }
 
-    // Ensure bucket exists
-    try {
-      await supabase.storage.createBucket('category-icons', { public: true })
-    } catch (e) {
-      // Ignore if it already exists
-    }
-
-    // Generate slug/id for storage path
-    const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-')
+    // Generate slug for storage path
+    const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
     let iconUrl = null
 
-    if (image) {
+    if (image && image.size > 0) {
       // Validate image
       if (image.size > 5 * 1024 * 1024) {
         return NextResponse.json({ error: 'Image must be smaller than 5 MB.' }, { status: 400 })
@@ -52,7 +48,7 @@ export async function POST(request: Request) {
       const fileName = `${slug}-${crypto.randomUUID()}.${fileExt}`
       const filePath = `${slug}/${fileName}`
 
-      const { error: uploadError } = await supabase.storage
+      const { error: uploadError } = await adminSupabase.storage
         .from('category-icons')
         .upload(filePath, image, {
           upsert: true,
@@ -63,31 +59,28 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: `Upload error: ${uploadError.message}` }, { status: 500 })
       }
 
-      const { data: publicUrlData } = supabase.storage
+      const { data: publicUrlData } = adminSupabase.storage
         .from('category-icons')
         .getPublicUrl(filePath)
 
       iconUrl = publicUrlData.publicUrl
     }
 
-    // Insert into database
-    // Note: We try to insert `icon_url`. If the column doesn't exist yet, this will fail.
-    // If it fails, we will dynamically create the column using an RPC or we can instruct the user.
-    // Wait, we can't create columns via standard Data API without RPC. We'll just assume the column exists or fallback.
-    const categoryData: any = { name }
+    const categoryData: any = { name, slug }
     if (iconUrl) {
       categoryData.icon = iconUrl
     } else if (iconName) {
       categoryData.icon = iconName
     }
 
-    const { data, error } = await supabase
+    const { data, error } = await adminSupabase
       .from('job_categories')
       .insert(categoryData)
       .select()
       .single()
 
     if (error) {
+      console.error('[POST /api/admin/categories] DB insert error:', error)
       throw error
     }
 
