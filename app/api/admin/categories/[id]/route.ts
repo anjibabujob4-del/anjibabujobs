@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse, NextRequest } from 'next/server'
+import { revalidatePath } from 'next/cache'
 
 
 export async function PUT(request: NextRequest, context: { params: Promise<{ id: string }> }) {
@@ -80,6 +81,8 @@ export async function PUT(request: NextRequest, context: { params: Promise<{ id:
       throw error
     }
 
+    revalidatePath('/', 'layout')
+
     return NextResponse.json({ success: true, category: data })
   } catch (error: any) {
     return NextResponse.json({ error: error.message || 'Unable to update category.' }, { status: 500 })
@@ -146,6 +149,8 @@ export async function DELETE(request: NextRequest, context: { params: Promise<{ 
         console.error('Failed to parse or remove icon URL', e)
       }
     }
+
+    revalidatePath('/', 'layout')
 
     return NextResponse.json({ success: true })
   } catch (error: any) {

@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { revalidatePath } from 'next/cache'
 
 
 export async function POST(request: Request) {
@@ -89,6 +90,8 @@ export async function POST(request: Request) {
     if (error) {
       throw error
     }
+
+    revalidatePath('/', 'layout')
 
     return NextResponse.json({ success: true, category: data })
   } catch (error: any) {
