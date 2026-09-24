@@ -21,6 +21,7 @@ import {
   Shield,
   Monitor,
 } from 'lucide-react'
+import { LatestJobsSection } from '@/components/customer/latest-jobs-section'
 
 // Icon mapping for all 15 categories from poster
 const CategoryIconMap: Record<string, any> = {
@@ -204,6 +205,9 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* LATEST JOBS SECTION */}
+      <LatestJobsSection />
 
       {/* CTA SECTION */}
       <section className="py-16 bg-gradient-to-r from-orange-500 via-orange-600 to-red-600 text-white text-center">
