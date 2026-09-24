@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse, NextRequest } from 'next/server'
-import { revalidatePath } from 'next/cache'
+import { revalidatePath, revalidateTag } from 'next/cache'
 
 
 export async function PUT(request: NextRequest, context: { params: Promise<{ id: string }> }) {
@@ -81,6 +81,7 @@ export async function PUT(request: NextRequest, context: { params: Promise<{ id:
       throw error
     }
 
+    revalidateTag('categories', 'max')
     revalidatePath('/', 'layout')
 
     return NextResponse.json({ success: true, category: data })
@@ -150,6 +151,7 @@ export async function DELETE(request: NextRequest, context: { params: Promise<{ 
       }
     }
 
+    revalidateTag('categories', 'max')
     revalidatePath('/', 'layout')
 
     return NextResponse.json({ success: true })

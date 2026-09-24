@@ -23,6 +23,9 @@ import {
 } from 'lucide-react'
 import { LatestJobsSection } from '@/components/customer/latest-jobs-section'
 
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 // Icon mapping for all 15 categories from poster
 const CategoryIconMap: Record<string, any> = {
   'Loading & Unloading': Truck,
@@ -70,15 +73,12 @@ export default async function HomePage() {
     .select('id, name, slug, icon')
     .order('name', { ascending: true })
 
-  // Merge DB categories with default slugs
-  const displayCategories =
-    dbCategories && dbCategories.length > 0
-      ? dbCategories.map((c) => ({
-          name: c.name,
-          slug: c.slug || c.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
-          icon: c.icon,
-        }))
-      : defaultCategories
+  // Always use live DB data — never serve a stale or hardcoded fallback
+  const displayCategories = (dbCategories || []).map((c) => ({
+    name: c.name,
+    slug: c.slug || c.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
+    icon: c.icon,
+  }))
 
   return (
     <div className="flex flex-col w-full">

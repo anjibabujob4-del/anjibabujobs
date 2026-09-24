@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
-import { revalidatePath } from 'next/cache'
+import { revalidatePath, revalidateTag } from 'next/cache'
 
 
 export async function POST(request: Request) {
@@ -91,6 +91,7 @@ export async function POST(request: Request) {
       throw error
     }
 
+    revalidateTag('categories', 'max')
     revalidatePath('/', 'layout')
 
     return NextResponse.json({ success: true, category: data })

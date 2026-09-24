@@ -6,6 +6,9 @@ import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { MapPin, IndianRupee, Briefcase, Clock, Search, Phone, Users } from 'lucide-react'
 
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 export default async function JobsPage({
   searchParams,
 }: {
