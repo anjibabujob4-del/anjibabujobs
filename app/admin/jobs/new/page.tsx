@@ -48,21 +48,31 @@ export default function NewJobPage() {
     const salary_max = formData.get('salary_max')
     const description = formData.get('description') as string
     const status = formData.get('status') as string
+    const vacancies = formData.get('vacancies')
 
     try {
-      const { error: insertError } = await supabase.from('jobs').insert({
-        title,
-        category_id: category_id || null,
-        location,
-        employment_type,
-        experience,
-        salary_min: salary_min ? Number(salary_min) : null,
-        salary_max: salary_max ? Number(salary_max) : null,
-        description,
-        status,
+      const response = await fetch('/api/jobs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title,
+          categoryId: category_id,
+          location,
+          employmentType: employment_type,
+          experience,
+          salaryMin: salary_min,
+          salaryMax: salary_max,
+          vacancies,
+          description,
+          status,
+        })
       })
 
-      if (insertError) throw insertError
+      const result = await response.json()
+      
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to create job')
+      }
 
       router.push('/admin/jobs')
       router.refresh()
@@ -135,6 +145,12 @@ export default function NewJobPage() {
                     <SelectItem value="Contract">Contract</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="vacancies" className="font-semibold text-slate-700">Number of Vacancies <span className="text-red-500">*</span></Label>
+                <Input id="vacancies" name="vacancies" type="number" min="1" max="100000" defaultValue="1" required className="bg-slate-50" />
+                <p className="text-xs text-slate-500">Enter the number of available positions for this job.</p>
               </div>
 
               <div className="space-y-2">

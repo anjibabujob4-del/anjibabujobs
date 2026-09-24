@@ -70,24 +70,31 @@ export default function EditJobPage() {
     const salary_max = formData.get('salary_max')
     const description = formData.get('description') as string
     const status = formData.get('status') as string
+    const vacancies = formData.get('vacancies')
 
     try {
-      const { error: updateError } = await supabase
-        .from('jobs')
-        .update({
+      const response = await fetch(`/api/jobs/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
           title,
-          category_id: category_id || null,
+          categoryId: category_id,
           location,
-          employment_type,
+          employmentType: employment_type,
           experience,
-          salary_min: salary_min ? Number(salary_min) : null,
-          salary_max: salary_max ? Number(salary_max) : null,
+          salaryMin: salary_min,
+          salaryMax: salary_max,
+          vacancies,
           description,
           status,
         })
-        .eq('id', id)
+      })
 
-      if (updateError) throw updateError
+      const result = await response.json()
+      
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to update job')
+      }
 
       router.push('/admin/jobs')
       router.refresh()
@@ -180,6 +187,12 @@ export default function EditJobPage() {
                     <SelectItem value="Contract">Contract</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="vacancies" className="font-semibold text-slate-700">Number of Vacancies <span className="text-red-500">*</span></Label>
+                <Input id="vacancies" name="vacancies" type="number" min="1" max="100000" defaultValue={job.vacancies || 1} required className="bg-slate-50" />
+                <p className="text-xs text-slate-500">Enter the number of available positions for this job.</p>
               </div>
 
               <div className="space-y-2">

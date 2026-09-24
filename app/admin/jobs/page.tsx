@@ -73,6 +73,7 @@ export default async function AdminJobsPage({
                   <TableHead className="w-[300px] font-semibold text-slate-700">Job Title</TableHead>
                   <TableHead className="font-semibold text-slate-700">Category</TableHead>
                   <TableHead className="font-semibold text-slate-700 hidden md:table-cell">Location</TableHead>
+                  <TableHead className="font-semibold text-slate-700">Vacancies</TableHead>
                   <TableHead className="font-semibold text-slate-700">Status</TableHead>
                   <TableHead className="font-semibold text-slate-700 hidden lg:table-cell">Date Posted</TableHead>
                   <TableHead className="text-right font-semibold text-slate-700">Actions</TableHead>
@@ -81,7 +82,7 @@ export default async function AdminJobsPage({
               <TableBody>
                 {!jobs || jobs.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="h-24 text-center text-slate-500">
+                    <TableCell colSpan={7} className="h-24 text-center text-slate-500">
                       No jobs found.
                     </TableCell>
                   </TableRow>
@@ -99,6 +100,9 @@ export default async function AdminJobsPage({
                       </TableCell>
                       <TableCell className="text-slate-500 hidden md:table-cell">
                         {job.location}
+                      </TableCell>
+                      <TableCell className="text-slate-900 font-medium">
+                        {job.vacancies || 1}
                       </TableCell>
                       <TableCell>
                         <Badge 

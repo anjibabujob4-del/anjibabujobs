@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { MapPin, Briefcase, IndianRupee, Clock, ArrowRight } from 'lucide-react'
+import { MapPin, Briefcase, IndianRupee, Clock, ArrowRight, Users } from 'lucide-react'
 
 // Specific filters requested by user
 const CATEGORY_FILTERS = [
@@ -27,6 +27,7 @@ type Job = {
   salary_max: number
   employment_type: string
   experience: string
+  vacancies: number
   created_at: string
   status: string
   job_categories?: { name: string }
@@ -54,6 +55,7 @@ export function LatestJobsSection() {
           salary_max,
           employment_type,
           experience,
+          vacancies,
           created_at,
           status,
           job_categories!inner(name)
@@ -193,6 +195,10 @@ export function LatestJobsSection() {
                     <div className="inline-flex items-center gap-1.5 text-xs font-medium text-blue-700 bg-blue-50 px-2 py-1 rounded-md">
                       <Briefcase className="w-3.5 h-3.5 text-blue-500" />
                       {job.employment_type || 'Full Time'} • {job.job_categories?.name || 'General'}
+                    </div>
+                    <div className="inline-flex items-center gap-1.5 text-xs font-medium text-green-700 bg-green-50 px-2 py-1 rounded-md">
+                      <Users className="w-3.5 h-3.5 text-green-500" />
+                      {job.vacancies === 1 ? '1 Vacancy' : `${job.vacancies || 1} Vacancies`}
                     </div>
                     {job.experience && (
                       <div className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-slate-100 px-2 py-1 rounded-md">

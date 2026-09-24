@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
-import { MapPin, IndianRupee, Briefcase, Clock, Search, Phone } from 'lucide-react'
+import { MapPin, IndianRupee, Briefcase, Clock, Search, Phone, Users } from 'lucide-react'
 
 export default async function JobsPage({
   searchParams,
@@ -134,6 +134,10 @@ export default async function JobsPage({
                           <span className="flex items-center gap-1.5 bg-green-50 text-green-700 px-2.5 py-1 rounded-md font-semibold">
                             <IndianRupee className="w-4 h-4" />
                             ₹{job.salary_min} - ₹{job.salary_max}
+                          </span>
+                          <span className="flex items-center gap-1.5 bg-purple-50 text-purple-700 px-2.5 py-1 rounded-md font-medium">
+                            <Users className="w-4 h-4" />
+                            {job.vacancies === 1 ? '1 Vacancy' : `${job.vacancies || 1} Vacancies`}
                           </span>
                           <span className="flex items-center gap-1.5 bg-orange-50 text-orange-700 px-2.5 py-1 rounded-md font-medium">
                             <Phone className="w-4 h-4" />

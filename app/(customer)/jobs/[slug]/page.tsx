@@ -203,7 +203,7 @@ export default async function DynamicJobOrCategoryPage({
 
                       <div className="flex items-center gap-1.5 truncate">
                         <Users className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                        <span>{job.vacancies ? `${job.vacancies} Vacancies` : 'Multiple Openings'}</span>
+                        <span>{job.vacancies === 1 ? '1 Vacancy' : `${job.vacancies || 1} Vacancies`}</span>
                       </div>
                     </div>
 
@@ -284,7 +284,7 @@ export default async function DynamicJobOrCategoryPage({
                     </span>
                     <span className="flex items-center gap-1.5">
                       <Users className="w-4 h-4 text-slate-400" />
-                      {job.vacancies || 1} Vacancies
+                      {job.vacancies === 1 ? '1 Vacancy' : `${job.vacancies || 1} Vacancies`}
                     </span>
                   </div>
                 </div>
@@ -374,14 +374,24 @@ export default async function DynamicJobOrCategoryPage({
                 </div>
 
                 <div className="pt-4 border-t">
-                  <Link href={`/apply/${job.id}`} className="block">
+                  {job.status === 'CLOSED' ? (
                     <Button
                       size="lg"
-                      className="w-full bg-orange-500 hover:bg-orange-600 text-white font-extrabold text-lg h-14 shadow-lg transition-transform hover:scale-[1.02]"
+                      disabled
+                      className="w-full bg-slate-300 text-slate-500 font-extrabold text-lg h-14 shadow-none"
                     >
-                      APPLY NOW
+                      APPLICATIONS CLOSED
                     </Button>
-                  </Link>
+                  ) : (
+                    <Link href={`/apply/${job.id}`} className="block">
+                      <Button
+                        size="lg"
+                        className="w-full bg-orange-500 hover:bg-orange-600 text-white font-extrabold text-lg h-14 shadow-lg transition-transform hover:scale-[1.02]"
+                      >
+                        APPLY NOW
+                      </Button>
+                    </Link>
+                  )}
                   <p className="text-xs text-slate-500 text-center mt-3">
                     Fast & simple online application. No fees required.
                   </p>
