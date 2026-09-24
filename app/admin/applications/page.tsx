@@ -76,7 +76,7 @@ export default async function AdminApplicationsPage() {
 
       <Card className="border-slate-200/60 shadow-sm overflow-hidden">
         <CardContent className="p-0">
-          <div className="overflow-x-auto">
+          <div className="hidden md:block overflow-x-auto">
             <Table>
               <TableHeader className="bg-slate-50/50">
                 <TableRow>
@@ -152,6 +152,65 @@ export default async function AdminApplicationsPage() {
                 )}
               </TableBody>
             </Table>
+          </div>
+
+          {/* Mobile Cards Layout */}
+          <div className="md:hidden divide-y divide-slate-100">
+            {error ? (
+              <div className="p-8 text-center text-red-500">Error loading applications.</div>
+            ) : !applications || applications.length === 0 ? (
+              <div className="p-8 text-center text-slate-500">No applications found.</div>
+            ) : (
+              applications.map((app: any) => {
+                const answers = app.application_answers || []
+                const candidateName = 
+                  app.profiles?.full_name || 
+                  getAnswerValue(answers, ['full_name', 'fullname', 'full name', 'name']) || 
+                  'Unknown Candidate'
+                
+                const candidateMobile = 
+                  app.profiles?.mobile || 
+                  getAnswerValue(answers, ['mobile', 'mobile_number', 'phone', 'contact', 'mobile number']) || 
+                  null
+                  
+                return (
+                  <div key={app.id} className="p-4 space-y-3">
+                    <div className="flex justify-between items-start">
+                      <span className="font-mono text-xs font-medium text-slate-600 bg-slate-100 px-2 py-1 rounded">
+                        {app.application_number}
+                      </span>
+                      {getStatusBadge(app.status)}
+                    </div>
+                    
+                    <div>
+                      <div className="font-semibold text-slate-900 text-lg">
+                        {candidateName}
+                      </div>
+                      {candidateMobile && (
+                        <div className="text-sm text-slate-500 mt-1">{candidateMobile}</div>
+                      )}
+                    </div>
+                    
+                    <div className="flex items-center gap-2 text-slate-700 font-medium">
+                      <FileText className="w-4 h-4 text-blue-600" />
+                      {app.jobs?.title || 'Unknown Job'}
+                    </div>
+                    
+                    <div className="flex items-center justify-between pt-2">
+                      <span className="text-slate-500 text-sm">
+                        {new Date(app.created_at).toLocaleDateString()}
+                      </span>
+                      <Link href={`/admin/applications/${app.id}`}>
+                        <div className="inline-flex items-center gap-2 px-3 py-2 bg-blue-50 text-blue-700 rounded-md hover:bg-blue-100 font-medium text-sm transition-colors">
+                          <Eye className="w-4 h-4" />
+                          View
+                        </div>
+                      </Link>
+                    </div>
+                  </div>
+                )
+              })
+            )}
           </div>
         </CardContent>
       </Card>

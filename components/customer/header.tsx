@@ -29,6 +29,9 @@ export default function CustomerHeader() {
           <Link href="/jobs" className="text-sm font-semibold text-slate-600 hover:text-blue-600 transition-colors">
             Find Jobs
           </Link>
+          <Link href="/jobs?view=categories" className="text-sm font-semibold text-slate-600 hover:text-blue-600 transition-colors">
+            Categories
+          </Link>
           <Link href="/admin/login" className="text-sm font-semibold text-slate-500 hover:text-slate-800 transition-colors">
             Admin
           </Link>
@@ -61,6 +64,13 @@ export default function CustomerHeader() {
             className="block text-base font-semibold text-slate-700 hover:text-blue-600 transition-colors p-2 rounded-md hover:bg-slate-50"
           >
             Find Jobs
+          </Link>
+          <Link 
+            href="/jobs?view=categories" 
+            onClick={() => setIsMobileMenuOpen(false)}
+            className="block text-base font-semibold text-slate-700 hover:text-blue-600 transition-colors p-2 rounded-md hover:bg-slate-50"
+          >
+            Categories
           </Link>
           <Link 
             href="/admin/login" 

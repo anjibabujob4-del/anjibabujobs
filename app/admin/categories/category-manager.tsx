@@ -173,7 +173,7 @@ export default function CategoryManager({
           </form>
         </CardHeader>
         <CardContent className="p-0">
-          <div className="overflow-x-auto">
+          <div className="hidden sm:block overflow-x-auto">
             <Table>
               <TableHeader className="bg-slate-50">
                 <TableRow>
@@ -226,6 +226,45 @@ export default function CategoryManager({
                 )}
               </TableBody>
             </Table>
+          </div>
+
+          {/* Mobile Cards Layout */}
+          <div className="sm:hidden divide-y divide-slate-100">
+            {categories.length === 0 ? (
+              <div className="p-8 text-center text-slate-500">No categories found.</div>
+            ) : (
+              categories.map((cat) => (
+                <div key={cat.id} className="p-4 flex items-center justify-between hover:bg-slate-50/50">
+                  <div className="space-y-1">
+                    <div className="font-semibold text-slate-900 text-base">{cat.name}</div>
+                    <div className="text-xs text-slate-500 flex items-center gap-2">
+                      <span className="bg-slate-100 px-2 py-0.5 rounded text-slate-600">
+                        {cat.icon || 'No Icon'}
+                      </span>
+                      <span>{new Date(cat.created_at).toLocaleDateString()}</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Button 
+                      onClick={() => openEdit(cat)}
+                      variant="ghost" 
+                      size="icon" 
+                      className="text-slate-500 hover:text-blue-600 h-8 w-8"
+                    >
+                      <Edit className="w-4 h-4" />
+                    </Button>
+                    <Button 
+                      onClick={() => openDelete(cat)}
+                      variant="ghost" 
+                      size="icon" 
+                      className="text-slate-500 hover:text-red-600 h-8 w-8"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </CardContent>
       </Card>

@@ -37,7 +37,7 @@ export default function CustomerFooter() {
           <ul className="space-y-3 text-sm text-slate-400">
             <li className="flex flex-col">
               <span className="text-xs text-slate-500 mb-1">Email</span>
-              <a href="mailto:support@anjibabujob.com" className="hover:text-white transition-colors">support@anjibabujob.com</a>
+              <a href="mailto:support@anjibabujob.com" className="hover:text-white transition-colors break-all">support@anjibabujob.com</a>
             </li>
             <li className="flex flex-col">
               <span className="text-xs text-slate-500 mb-1">Phone</span>
