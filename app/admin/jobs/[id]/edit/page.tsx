@@ -65,6 +65,7 @@ export default function EditJobPage() {
     const category_id = formData.get('category_id') as string
     const location = formData.get('location') as string
     const employment_type = formData.get('employment_type') as string
+    const experience = formData.get('experience') as string
     const salary_min = formData.get('salary_min')
     const salary_max = formData.get('salary_max')
     const description = formData.get('description') as string
@@ -78,6 +79,7 @@ export default function EditJobPage() {
           category_id: category_id || null,
           location,
           employment_type,
+          experience,
           salary_min: salary_min ? Number(salary_min) : null,
           salary_max: salary_max ? Number(salary_max) : null,
           description,
@@ -178,6 +180,11 @@ export default function EditJobPage() {
                     <SelectItem value="Contract">Contract</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="experience" className="font-semibold text-slate-700">Experience Required</Label>
+                <Input id="experience" name="experience" defaultValue={job.experience || ''} placeholder="e.g. 1-3 Years" className="bg-slate-50" />
               </div>
 
               <div className="space-y-2">
